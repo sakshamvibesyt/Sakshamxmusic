@@ -1,4 +1,15 @@
 
 #!/bin/bash
-python3 health_server.py &
-python3 -m ShrutixMusic
+
+set -e
+
+echo "Starting Shrutix Music Bot health server..."
+
+python3 -u health_server.py &
+HEALTH_PID=$!
+
+echo "Health server process started with PID: $HEALTH_PID"
+
+echo "Starting Shrutix Music Bot..."
+
+python3 -u -m ShrutixMusic
