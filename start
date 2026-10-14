@@ -1,1 +1,4 @@
+
+#!/bin/bash
+python3 health_server.py &
 python3 -m ShrutixMusic
