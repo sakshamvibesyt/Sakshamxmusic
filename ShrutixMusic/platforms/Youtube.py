@@ -161,9 +161,9 @@ def _download_sync(link: str, kind: str, output_file: str) -> str | None:
                     if os.path.isfile(path) and os.path.getsize(path) > 0:
                         return path
 
-        return None
-
-    except Exception:
+        
+    except Exception as e:
+        print(f"[YT-DLP DOWNLOAD ERROR] {type(e).__name__}: {e}", flush=True)
         return None
 
 
