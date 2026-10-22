@@ -83,6 +83,9 @@ votemode = {}
 autoclean = []
 confirmer = {}
 
+# Optional separate SEM X SHRUTI welcome artwork. Leave blank to use START_IMG_URL.
+SEMX_WELCOME_IMG_URL = getenv("SEMX_WELCOME_IMG_URL", "").strip()
+
 START_IMG_URL = getenv(
     "START_IMG_URL",
     "https://i.ibb.co/KRdfV59/4027f92d-d204-4942-af78-0fb6319cca61.jpg"
