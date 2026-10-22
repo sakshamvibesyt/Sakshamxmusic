@@ -8,7 +8,7 @@ from ShrutixMusic import nand
 
 PAGE_ONE = ["hb1", "hb2", "hb3", "hb4", "hb5", "hb6", "hb7", "hb8", "hb9"]
 PAGE_TWO = ["hb10", "hb11", "hb12", "hb13", "hb14", "hb15", "hb16"]
-NAV_STYLES = (ButtonStyle.PRIMARY, ButtonStyle.SUCCESS, ButtonStyle.DANGER)
+NAV_STYLES = (ButtonStyle.PRIMARY, ButtonStyle.SUCCESS)  # neon-style palette; avoid red danger buttons
 
 
 def _chunk(items, size):
@@ -31,7 +31,7 @@ def help_pannel(_, START: Union[bool, int] = None, page: int = 1):
     rows = _chunk(
         [
             InlineKeyboardButton(
-                text=_[f"H_B_{key[2:]}"],
+                text=f"✦ {_[f'H_B_{key[2:]}']} ✦",
                 callback_data=f"help_callback {key} {sf}",
             )
             for key in items
@@ -44,7 +44,7 @@ def help_pannel(_, START: Union[bool, int] = None, page: int = 1):
         nav = [
             mark,
             InlineKeyboardButton(
-                text=_["NEXT_BUTTON"],
+                text=f"NEXT  ›  {_['NEXT_BUTTON']}",
                 callback_data=f"help_page 2 {sf}",
                 style=style,
             ),
@@ -52,7 +52,7 @@ def help_pannel(_, START: Union[bool, int] = None, page: int = 1):
     else:
         nav = [
             InlineKeyboardButton(
-                text=_["PREV_BUTTON"],
+                text=f"‹  PREVIOUS  {_['PREV_BUTTON']}",
                 callback_data=f"help_page 1 {sf}",
                 style=style,
             ),
@@ -68,7 +68,7 @@ def help_back_markup(_, page: int = 1, START: Union[bool, int] = None):
         [
             [
                 InlineKeyboardButton(
-                    text=_["BACK_BUTTON"], callback_data=f"help_page {page} {sf}"
+                    text=f"‹  {_['BACK_BUTTON']}  •  SEM X SHRUTI", callback_data=f"help_page {page} {sf}"
                 )
             ]
         ]
