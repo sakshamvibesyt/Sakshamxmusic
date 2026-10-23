@@ -1,15 +1,21 @@
 
 #!/bin/bash
 
-set -e
-
 echo "Starting Shrutix Music Bot health server..."
 
 python3 -u health_server.py &
 HEALTH_PID=$!
 
-echo "Health server process started with PID: $HEALTH_PID"
+echo "Health server started with PID: $HEALTH_PID"
 
-echo "Starting Shrutix Music Bot..."
+while true; do
+    echo "Starting Shrutix Music Bot..."
 
-python3 -u -m ShrutixMusic
+    python3 -u -m ShrutixMusic
+    BOT_STATUS=$?
+
+    echo "Music bot stopped with exit code: $BOT_STATUS"
+    echo "Restarting music bot in 5 seconds..."
+
+    sleep 5
+done
