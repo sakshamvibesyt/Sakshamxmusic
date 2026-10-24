@@ -34,14 +34,9 @@ MESSAGE_EFFECTS = [
     5046509860389126442,
 ]
 
-# Used only if SEMX_WELCOME_STICKER_ID is not set in Render.
-DEFAULT_WELCOME_STICKER_ID = (
-    "CAACAgUAAxkBAAFWmh5q3BSh3CaSFrEN2esOgyHquycXPgACKBcAAjpOGVSmWU36hFlrwD0E"
-)
-
 
 def welcome_photo():
-    """Use the separate Shruti welcome photo if configured."""
+    """Use custom Shruti image if configured."""
     return (
         getattr(config, "SEMX_WELCOME_IMG_URL", "").strip()
         or config.START_IMG_URL
@@ -49,77 +44,91 @@ def welcome_photo():
 
 
 def welcome_caption(user, bot):
-    """Shruti's custom English welcome caption."""
+    """Premium Sem X Shruti welcome screen."""
     return (
-        f"<blockquote expandable>"
-        f"<b>Hᴇʏ {user.mention}</b> 💜\n\n"
-        f"Wᴇʟᴄᴏᴍᴇ ᴛᴏ <b>{bot.mention}</b> — "
-        f"ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴍᴜsɪᴄ ᴇxᴘᴇʀɪᴇɴᴄᴇ 🎧\n\n"
-        f"╭━━━〔 🎶 ᴍᴜsɪᴄ ᴍᴏᴅᴇ 〕━━━╮\n"
-        f"│ ✦ ᴘʟᴀʏ ʏᴏᴜʀ ғᴀᴠᴏᴜʀɪᴛᴇ ᴛʀᴀᴄᴋs\n"
-        f"│ ✦ ᴇɴᴊᴏʏ ᴍᴜsɪᴄ ɪɴ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ\n"
-        f"│ ✦ ᴄᴏɴᴛʀᴏʟ ᴛʜᴇ ǫᴜᴇᴜᴇ ᴇᴀsɪʟʏ\n"
-        f"╰━━━━━━━━━━━━━━━━━━━━╯\n\n"
-        f"💫 Sᴍᴏᴏᴛʜ sᴛʀᴇᴀᴍɪɴɢ. Cʟᴇᴀɴ ᴠɪʙᴇs.\n"
-        f"ᴏɴᴇ ᴘᴇʀғᴇᴄᴛ ᴘʟᴀʏʟɪsᴛ.\n\n"
-        f"👑 <b>Dᴇᴠᴇʟᴏᴘᴇʀ:</b> "
-        f"<a href='https://t.me/Sakshamvenus'>@Sakshamvenus</a>\n\n"
-        f"👇 Tᴀᴘ ᴛʜᴇ ʙᴜᴛᴛᴏɴs ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ sᴛᴀʀᴛᴇᴅ."
-        f"</blockquote>"
+        f"<b>╭━━━〔 🎧 SEM X SHRUTI 〕━━━╮</b>\n"
+        f"<i>YOUR MUSIC. YOUR MOOD. YOUR WORLD.</i>\n"
+        f"<b>╰━━━━━━━━━━━━━━━━━━━━━━╯</b>\n\n"
+
+        f"Hey {user.mention}, welcome aboard! 💜\n"
+        f"You are now connected to <b>{bot.mention}</b> — "
+        f"your personal voice-chat music companion.\n\n"
+
+        f"<b>┏━━━ ✦ THE EXPERIENCE ✦ ━━━┓</b>\n"
+        f"🎵  <b>Instant Music</b>\n"
+        f"<blockquote>Find your favourite tracks and play your vibe.</blockquote>\n"
+        f"🔊  <b>Voice Chat Streaming</b>\n"
+        f"<blockquote>Bring music into your group's voice chat.</blockquote>\n"
+        f"🎚️  <b>Smart Playback</b>\n"
+        f"<blockquote>Control your music and manage the queue.</blockquote>\n"
+        f"⚡  <b>Made for the Vibe</b>\n"
+        f"<blockquote>Simple commands. Smooth experience.</blockquote>\n"
+        f"<b>┗━━━━━━━━━━━━━━━━━━━━━━┛</b>\n\n"
+
+        f"💿 <b>YOUR NEXT TRACK STARTS HERE</b>\n"
+        f"<code>/play song name</code>\n\n"
+
+        f"👑 <b>CREATED BY</b>\n"
+        f"<a href='https://t.me/Sakshamvenus'>Saksham Venus</a>\n\n"
+
+        f"<i>Good music. Good people. Unmatched vibes. ✨</i>\n"
+        f"👇 <b>Choose your destination below.</b>"
     )
 
 
 async def play_welcome_animation(message):
-    """Try a reaction and show a short loading animation."""
+    """React to /start and display a short animated intro."""
     try:
         await message.react(emoji="🎧", big=True)
     except Exception as exc:
         print(f"Welcome reaction unavailable: {exc}")
 
     frames = [
-        "╭━━━〔 🎧 SEM X SHRUTI 〕━━━╮\n"
-        "│ ▰▱▱▱▱▱  ᴡᴀᴋɪɴɢ ᴜᴘ...\n"
-        "╰━━━━━━━━━━━━━━━━━━━━╯",
-
-        "╭━━━〔 💜 ɪɴɪᴛɪᴀʟɪᴢɪɴɢ 〕━━━╮\n"
-        "│ ▰▰▰▰▱▱  ʟᴏᴀᴅɪɴɢ ᴍᴜsɪᴄ...\n"
-        "╰━━━━━━━━━━━━━━━━━━━━╯",
-
-        "╭━━━〔 ✨ ᴀʟᴍᴏsᴛ ʀᴇᴀᴅʏ 〕━━━╮\n"
-        "│ ▰▰▰▰▰▰  ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ sʜʀᴜᴛɪ\n"
-        "╰━━━━━━━━━━━━━━━━━━━━╯",
+        (
+            "<b>╭━━━〔 SEM X SHRUTI 〕━━━╮</b>\n"
+            "   ◉ Establishing connection...\n"
+            "   ▰▱▱▱▱▱  <i>CONNECTING</i>\n"
+            "<b>╰━━━━━━━━━━━━━━━━━━━━╯</b>"
+        ),
+        (
+            "<b>╭━━━〔 SEM X SHRUTI 〕━━━╮</b>\n"
+            "   ◉ Tuning into your vibe 💜\n"
+            "   ▰▰▰▰▱▱  <i>LOADING MUSIC</i>\n"
+            "<b>╰━━━━━━━━━━━━━━━━━━━━╯</b>"
+        ),
+        (
+            "<b>╭━━━〔 SEM X SHRUTI 〕━━━╮</b>\n"
+            "   ◉ Your music world is ready ✨\n"
+            "   ▰▰▰▰▰▰  <i>ALL SYSTEMS READY</i>\n"
+            "<b>╰━━━━━━━━━━━━━━━━━━━━╯</b>"
+        ),
     ]
 
     loader = None
     try:
-        loader = await message.reply_text(frames[0])
+        loader = await message.reply_text(
+            frames[0],
+            disable_web_page_preview=True,
+        )
+
         for frame in frames[1:]:
-            await asyncio.sleep(0.4)
-            await loader.edit_text(frame)
-        await asyncio.sleep(0.3)
+            await asyncio.sleep(0.65)
+            await loader.edit_text(
+                frame,
+                disable_web_page_preview=True,
+            )
+
+        await asyncio.sleep(0.35)
+
     except Exception as exc:
         print(f"Welcome animation error: {exc}")
+
     finally:
         if loader:
             try:
                 await loader.delete()
             except Exception:
                 pass
-
-
-async def send_welcome_sticker(message):
-    """Send the configured sticker; continue if Telegram rejects it."""
-    sticker_id = (
-        getattr(config, "SEMX_WELCOME_STICKER_ID", "").strip()
-        or DEFAULT_WELCOME_STICKER_ID
-    )
-    try:
-        await nand.send_sticker(
-            chat_id=message.chat.id,
-            sticker=sticker_id,
-        )
-    except Exception as exc:
-        print(f"Welcome sticker error: {exc}")
 
 
 @nand.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
@@ -146,77 +155,96 @@ async def start_pm(client, message: Message, _):
             return await nand.send_message(
                 chat_id=config.LOGGER_ID,
                 text=(
-                    f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ "
-                    f"ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n"
-                    f"<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n"
-                    f"<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}"
+                    f"{message.from_user.mention} started the bot "
+                    f"to check the <b>sudolist</b>.\n\n"
+                    f"<b>User ID:</b> <code>{message.from_user.id}</code>\n"
+                    f"<b>Username:</b> @{message.from_user.username}"
                 ),
             )
         return
 
     if name.startswith("inf"):
-        m = await message.reply_text("🔎")
-        query = str(name).replace("info_", "", 1)
-        query = f"https://www.youtube.com/watch?v={query}"
-        results = VideosSearch(query, limit=1)
-        result_list = (await results.next())["result"]
+        m = await message.reply_text("🔎 Finding track information...")
+        try:
+            query = str(name).replace("info_", "", 1)
+            query = f"https://www.youtube.com/watch?v={query}"
+            results = VideosSearch(query, limit=1)
+            result_list = (await results.next())["result"]
 
-        if not result_list:
-            await m.edit_text("Couldn't find track information.")
-            return
+            if not result_list:
+                await m.edit_text("❌ Couldn't find track information.")
+                return
 
-        result = result_list[0]
-        title = result["title"]
-        duration = result["duration"]
-        views = result["viewCount"]["short"]
-        thumbnail = result["thumbnails"][0]["url"].split("?")[0]
-        channellink = result["channel"]["link"]
-        channel = result["channel"]["name"]
-        link = result["link"]
-        published = result["publishedTime"]
+            result = result_list[0]
+            title = result["title"]
+            duration = result["duration"]
+            views = result["viewCount"]["short"]
+            thumbnail = result["thumbnails"][0]["url"].split("?")[0]
+            channellink = result["channel"]["link"]
+            channel = result["channel"]["name"]
+            link = result["link"]
+            published = result["publishedTime"]
 
-        searched_text = _["start_6"].format(
-            title, duration, views, published, channellink, channel, nand.mention
-        )
-        key = InlineKeyboardMarkup(
-            [
-                [
-                    InlineKeyboardButton(text=_["S_B_8"], url=link),
-                    InlineKeyboardButton(
-                        text=_["S_B_9"], url=config.SUPPORT_CHAT
-                    ),
-                ],
-            ]
-        )
-
-        await m.delete()
-        await nand.send_photo(
-            chat_id=message.chat.id,
-            photo=thumbnail,
-            caption=searched_text,
-            reply_markup=key,
-        )
-
-        if await is_on_off(2):
-            await nand.send_message(
-                chat_id=config.LOGGER_ID,
-                text=(
-                    f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ "
-                    f"ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n"
-                    f"<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n"
-                    f"<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}"
-                ),
+            searched_text = _["start_6"].format(
+                title,
+                duration,
+                views,
+                published,
+                channellink,
+                channel,
+                nand.mention,
             )
+
+            key = InlineKeyboardMarkup(
+                [
+                    [
+                        InlineKeyboardButton(
+                            text=_[ "S_B_8" ],
+                            url=link,
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            text=_[ "S_B_9" ],
+                            url=config.SUPPORT_CHAT,
+                        )
+                    ],
+                ]
+            )
+
+            await m.delete()
+            await nand.send_photo(
+                chat_id=message.chat.id,
+                photo=thumbnail,
+                caption=searched_text,
+                reply_markup=key,
+            )
+
+            if await is_on_off(2):
+                await nand.send_message(
+                    chat_id=config.LOGGER_ID,
+                    text=(
+                        f"{message.from_user.mention} checked track information.\n\n"
+                        f"<b>User ID:</b> <code>{message.from_user.id}</code>\n"
+                        f"<b>Username:</b> @{message.from_user.username}"
+                    ),
+                )
+        except Exception as exc:
+            print(f"Track info error: {exc}")
+            try:
+                await m.edit_text(
+                    "⚠️ Couldn't load track information. Please try again."
+                )
+            except Exception:
+                pass
         return
 
     await play_welcome_animation(message)
-    await send_welcome_sticker(message)
 
-    out = private_panel(_)
     await message.reply_photo(
         photo=welcome_photo(),
         caption=welcome_caption(message.from_user, nand),
-        reply_markup=InlineKeyboardMarkup(out),
+        reply_markup=InlineKeyboardMarkup(private_panel(_)),
         effect_id=effect_id,
     )
 
@@ -224,9 +252,9 @@ async def start_pm(client, message: Message, _):
         return await nand.send_message(
             chat_id=config.LOGGER_ID,
             text=(
-                f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ.\n\n"
-                f"<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n"
-                f"<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}"
+                f"{message.from_user.mention} started the bot.\n\n"
+                f"<b>User ID:</b> <code>{message.from_user.id}</code>\n"
+                f"<b>Username:</b> @{message.from_user.username}"
             ),
         )
 
@@ -290,4 +318,4 @@ async def welcome(client, message: Message):
 
         except Exception as exc:
             print(f"Group welcome error: {exc}")
-            
+    
