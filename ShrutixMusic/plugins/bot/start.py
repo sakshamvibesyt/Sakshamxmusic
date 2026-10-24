@@ -36,7 +36,6 @@ MESSAGE_EFFECTS = [
 
 
 def welcome_photo():
-    """Use custom Shruti image if configured."""
     return (
         getattr(config, "SEMX_WELCOME_IMG_URL", "").strip()
         or config.START_IMG_URL
@@ -44,40 +43,47 @@ def welcome_photo():
 
 
 def welcome_caption(user, bot):
-    """Premium Sem X Shruti welcome screen."""
+    """Compact welcome with expandable premium details."""
     return (
-        f"<b>╭━━━〔 🎧 SEM X SHRUTI 〕━━━╮</b>\n"
-        f"<i>YOUR MUSIC. YOUR MOOD. YOUR WORLD.</i>\n"
-        f"<b>╰━━━━━━━━━━━━━━━━━━━━━━╯</b>\n\n"
-
-        f"Hey {user.mention}, welcome aboard! 💜\n"
-        f"You are now connected to <b>{bot.mention}</b> — "
-        f"your personal voice-chat music companion.\n\n"
-
-        f"<b>┏━━━ ✦ THE EXPERIENCE ✦ ━━━┓</b>\n"
-        f"🎵  <b>Instant Music</b>\n"
-        f"<blockquote>Find your favourite tracks and play your vibe.</blockquote>\n"
-        f"🔊  <b>Voice Chat Streaming</b>\n"
-        f"<blockquote>Bring music into your group's voice chat.</blockquote>\n"
-        f"🎚️  <b>Smart Playback</b>\n"
-        f"<blockquote>Control your music and manage the queue.</blockquote>\n"
-        f"⚡  <b>Made for the Vibe</b>\n"
-        f"<blockquote>Simple commands. Smooth experience.</blockquote>\n"
-        f"<b>┗━━━━━━━━━━━━━━━━━━━━━━┛</b>\n\n"
-
-        f"💿 <b>YOUR NEXT TRACK STARTS HERE</b>\n"
+        f"🎧 <b>ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ</b>\n"
+        f"<b>sᴇᴍ x sʜʀᴜᴛɪ ʙᴏᴛ 💜</b>\n\n"
+        f"✦ ʜᴇʏ, {user.mention} ✨\n"
+        f"<i>ʏᴏᴜʀ ᴍᴜsɪᴄ. ʏᴏᴜʀ ᴠɪʙᴇ.</i>\n\n"
+        f"<blockquote expandable>"
+        f"💜 <b>ʏᴏᴜʀ ᴘᴇʀsᴏɴᴀʟ ᴍᴜsɪᴄ ᴜɴɪᴠᴇʀsᴇ!</b>\n\n"
+        f"🎵 <b>ᴘʀᴇᴍɪᴜᴍ ғᴇᴀᴛᴜʀᴇs</b>\n"
+        f"┊ 🎶 ᴍᴜsɪᴄ sᴛʀᴇᴀᴍɪɴɢ\n"
+        f"┊ 🎙️ ᴠᴏɪᴄᴇ ᴄʜᴀᴛ ᴍᴜsɪᴄ\n"
+        f"┊ 🤖 sᴍᴀʀᴛ ᴀssɪsᴛᴀɴᴛ\n\n"
+        f"🎧 <b>ᴛʀʏ ɪᴛ ɴᴏᴡ</b>\n"
         f"<code>/play song name</code>\n\n"
-
-        f"👑 <b>CREATED BY</b>\n"
-        f"<a href='https://t.me/Sakshamvenus'>Saksham Venus</a>\n\n"
-
-        f"<i>Good music. Good people. Unmatched vibes. ✨</i>\n"
-        f"👇 <b>Choose your destination below.</b>"
+        f"👑 <b>ᴏᴡɴᴇʀ:</b> "
+        f"<a href='https://t.me/Sakshamvenus'>Saksham Venus</a>\n"
+        f"⚡ <b>ᴘᴏᴡᴇʀᴇᴅ ʙʏ sᴇᴍ x sʜʀᴜᴛɪ</b>\n\n"
+        f"💜 ᴍᴜsɪᴄ ɪs ᴍᴏʀᴇ ᴛʜᴀɴ sᴏᴜɴᴅ — ɪᴛ's ᴀ ᴠɪʙᴇ!\n"
+        f"</blockquote>\n\n"
+        f"🫧 <i>ᴛᴀᴘ ᴛᴏ ʀᴇᴠᴇᴀʟ ᴛʜᴇ ᴍᴀɢɪᴄ</i> 💜\n"
+        f"👇 <b>ᴄʜᴏᴏsᴇ ʏᴏᴜʀ ᴏᴘᴛɪᴏɴ</b>"
     )
 
 
+async def send_welcome_sticker(message):
+    """Send the configured welcome sticker, if one is set."""
+    sticker_id = getattr(
+        config, "SEMX_WELCOME_STICKER_ID", ""
+    ).strip()
+
+    if not sticker_id:
+        return
+
+    try:
+        await message.reply_sticker(sticker=sticker_id)
+    except Exception as exc:
+        print(f"Welcome sticker unavailable: {exc}")
+
+
 async def play_welcome_animation(message):
-    """React to /start and display a short animated intro."""
+    """Short loading animation and reaction."""
     try:
         await message.react(emoji="🎧", big=True)
     except Exception as exc:
@@ -85,22 +91,19 @@ async def play_welcome_animation(message):
 
     frames = [
         (
-            "<b>╭━━━〔 SEM X SHRUTI 〕━━━╮</b>\n"
-            "   ◉ Establishing connection...\n"
-            "   ▰▱▱▱▱▱  <i>CONNECTING</i>\n"
-            "<b>╰━━━━━━━━━━━━━━━━━━━━╯</b>"
+            "💜 <b>SEM X SHRUTI</b>\n"
+            "◉ Connecting to your vibe...\n"
+            "▰▱▱▱▱▱ <i>LOADING</i>"
         ),
         (
-            "<b>╭━━━〔 SEM X SHRUTI 〕━━━╮</b>\n"
-            "   ◉ Tuning into your vibe 💜\n"
-            "   ▰▰▰▰▱▱  <i>LOADING MUSIC</i>\n"
-            "<b>╰━━━━━━━━━━━━━━━━━━━━╯</b>"
+            "🎧 <b>SEM X SHRUTI</b>\n"
+            "◉ Tuning into your music...\n"
+            "▰▰▰▰▱▱ <i>ALMOST READY</i>"
         ),
         (
-            "<b>╭━━━〔 SEM X SHRUTI 〕━━━╮</b>\n"
-            "   ◉ Your music world is ready ✨\n"
-            "   ▰▰▰▰▰▰  <i>ALL SYSTEMS READY</i>\n"
-            "<b>╰━━━━━━━━━━━━━━━━━━━━╯</b>"
+            "✨ <b>YOUR MUSIC IS READY</b>\n"
+            "◉ Let the vibe begin!\n"
+            "▰▰▰▰▰▰ <i>CONNECTED</i>"
         ),
     ]
 
@@ -112,13 +115,13 @@ async def play_welcome_animation(message):
         )
 
         for frame in frames[1:]:
-            await asyncio.sleep(0.65)
+            await asyncio.sleep(0.7)
             await loader.edit_text(
                 frame,
                 disable_web_page_preview=True,
             )
 
-        await asyncio.sleep(0.35)
+        await asyncio.sleep(0.3)
 
     except Exception as exc:
         print(f"Welcome animation error: {exc}")
@@ -131,7 +134,9 @@ async def play_welcome_animation(message):
                 pass
 
 
-@nand.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
+@nand.on_message(
+    filters.command(["start"]) & filters.private & ~BANNED_USERS
+)
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
@@ -141,11 +146,10 @@ async def start_pm(client, message: Message, _):
     name = parts[1] if len(parts) > 1 else ""
 
     if name.startswith("help"):
-        keyboard = help_pannel(_)
         return await message.reply_photo(
             photo=welcome_photo(),
             caption=_[ "help_1" ].format(config.SUPPORT_CHAT),
-            reply_markup=keyboard,
+            reply_markup=help_pannel(_),
             effect_id=effect_id,
         )
 
@@ -155,8 +159,7 @@ async def start_pm(client, message: Message, _):
             return await nand.send_message(
                 chat_id=config.LOGGER_ID,
                 text=(
-                    f"{message.from_user.mention} started the bot "
-                    f"to check the <b>sudolist</b>.\n\n"
+                    f"{message.from_user.mention} checked the sudolist.\n\n"
                     f"<b>User ID:</b> <code>{message.from_user.id}</code>\n"
                     f"<b>Username:</b> @{message.from_user.username}"
                 ),
@@ -172,8 +175,9 @@ async def start_pm(client, message: Message, _):
             result_list = (await results.next())["result"]
 
             if not result_list:
-                await m.edit_text("❌ Couldn't find track information.")
-                return
+                return await m.edit_text(
+                    "❌ Couldn't find track information."
+                )
 
             result = result_list[0]
             title = result["title"]
@@ -195,7 +199,7 @@ async def start_pm(client, message: Message, _):
                 nand.mention,
             )
 
-            key = InlineKeyboardMarkup(
+            keyboard = InlineKeyboardMarkup(
                 [
                     [
                         InlineKeyboardButton(
@@ -217,18 +221,9 @@ async def start_pm(client, message: Message, _):
                 chat_id=message.chat.id,
                 photo=thumbnail,
                 caption=searched_text,
-                reply_markup=key,
+                reply_markup=keyboard,
             )
 
-            if await is_on_off(2):
-                await nand.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=(
-                        f"{message.from_user.mention} checked track information.\n\n"
-                        f"<b>User ID:</b> <code>{message.from_user.id}</code>\n"
-                        f"<b>Username:</b> @{message.from_user.username}"
-                    ),
-                )
         except Exception as exc:
             print(f"Track info error: {exc}")
             try:
@@ -240,6 +235,7 @@ async def start_pm(client, message: Message, _):
         return
 
     await play_welcome_animation(message)
+    await send_welcome_sticker(message)
 
     await message.reply_photo(
         photo=welcome_photo(),
@@ -259,16 +255,19 @@ async def start_pm(client, message: Message, _):
         )
 
 
-@nand.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
+@nand.on_message(
+    filters.command(["start"]) & filters.group & ~BANNED_USERS
+)
 @LanguageStart
 async def start_gp(client, message: Message, _):
-    out = start_panel(_)
     uptime = int(time.time() - _boot_)
 
     await message.reply_photo(
         photo=welcome_photo(),
-        caption=_[ "start_1" ].format(nand.mention, get_readable_time(uptime)),
-        reply_markup=InlineKeyboardMarkup(out),
+        caption=_[ "start_1" ].format(
+            nand.mention, get_readable_time(uptime)
+        ),
+        reply_markup=InlineKeyboardMarkup(start_panel(_)),
     )
     return await add_served_chat(message.chat.id)
 
@@ -302,7 +301,6 @@ async def welcome(client, message: Message):
                     )
                     return await nand.leave_chat(message.chat.id)
 
-                out = start_panel(_)
                 await message.reply_photo(
                     photo=welcome_photo(),
                     caption=_[ "start_3" ].format(
@@ -311,11 +309,11 @@ async def welcome(client, message: Message):
                         message.chat.title,
                         nand.mention,
                     ),
-                    reply_markup=InlineKeyboardMarkup(out),
+                    reply_markup=InlineKeyboardMarkup(start_panel(_)),
                 )
                 await add_served_chat(message.chat.id)
                 await message.stop_propagation()
 
         except Exception as exc:
             print(f"Group welcome error: {exc}")
-    
+            
