@@ -10,14 +10,14 @@ def start_panel(_):
     return [
         [
             InlineKeyboardButton(
-                text="➕  ADD TO GROUP",
+                text="🎧  ᴀᴅᴅ ᴛᴏ ɢʀᴏᴜᴘ",
                 url=f"https://t.me/{nand.username}?startgroup=true",
                 style=ButtonStyle.PRIMARY,
             )
         ],
         [
             InlineKeyboardButton(
-                text="💬  SUPPORT",
+                text="💬  sᴜᴘᴘᴏʀᴛ",
                 url=config.SUPPORT_CHAT,
                 style=ButtonStyle.SUCCESS,
             )
@@ -29,38 +29,34 @@ def private_panel(_):
     return [
         [
             InlineKeyboardButton(
-                text="🎧  ADD SHRUTI TO YOUR GROUP",
+                text="🎧  ᴀᴅᴅ ᴛᴏ ɢʀᴏᴜᴘ",
                 url=f"https://t.me/{nand.username}?startgroup=true",
                 style=ButtonStyle.PRIMARY,
             )
         ],
         [
             InlineKeyboardButton(
-                text="⚙️  HELP & COMMANDS",
+                text="⚙️  ʜᴇʟᴘ & ᴄᴏᴍᴍᴀɴᴅs",
                 callback_data="settings_back_helper",
                 style=ButtonStyle.SUCCESS,
-            )
-        ],
-        [
+            ),
             InlineKeyboardButton(
-                text="📢  UPDATES CHANNEL",
+                text="📢  ᴜᴘᴅᴀᴛᴇs",
                 url=config.SUPPORT_CHANNEL,
                 style=ButtonStyle.PRIMARY,
-            )
+            ),
         ],
         [
             InlineKeyboardButton(
-                text="💬  SUPPORT CHAT",
+                text="💬  sᴜᴘᴘᴏʀᴛ",
                 url=config.SUPPORT_CHAT,
                 style=ButtonStyle.SUCCESS,
-            )
-        ],
-        [
+            ),
             InlineKeyboardButton(
-                text="👑  DEVELOPER • SAKSHAM VENUS",
+                text="👑  ᴏᴡɴᴇʀ",
                 url="https://t.me/Sakshamvenus",
                 style=ButtonStyle.PRIMARY,
-            )
+            ),
         ],
     ]
     
