@@ -1,21 +1,51 @@
 
 #!/bin/bash
 
-echo "Starting Shrutix Music Bot health server..."
+set -u
 
+BOT_PID_FILE="/tmp/shrutix_bot.pid"
+BOT_PID=""
+HEALTH_PID=""
+
+cleanup() {
+    echo "Stopping Shrutix Music Bot..."
+
+    if [ -n "$BOT_PID" ]; then
+        kill "$BOT_PID" 2>/dev/null || true
+    fi
+
+    if [ -n "$HEALTH_PID" ]; then
+        kill "$HEALTH_PID" 2>/dev/null || true
+    fi
+
+    rm -f "$BOT_PID_FILE"
+}
+
+trap cleanup EXIT
+trap 'exit 0' INT TERM
+
+echo "Starting Shrutix Music Bot health server..."
 python3 -u health_server.py &
 HEALTH_PID=$!
 
-echo "Health server started with PID: $HEALTH_PID"
+sleep 1
 
 while true; do
     echo "Starting Shrutix Music Bot..."
 
-    python3 -u -m ShrutixMusic
+    python3 -u -m ShrutixMusic &
+    BOT_PID=$!
+
+    echo "$BOT_PID" > "$BOT_PID_FILE"
+
+    wait "$BOT_PID"
     BOT_STATUS=$?
 
-    echo "Music bot stopped with exit code: $BOT_STATUS"
-    echo "Restarting music bot in 5 seconds..."
+    BOT_PID=""
+    rm -f "$BOT_PID_FILE"
+
+    echo "Music bot exited with code: $BOT_STATUS"
+    echo "Restarting in 5 seconds..."
 
     sleep 5
 done
