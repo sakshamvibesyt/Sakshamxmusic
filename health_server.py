@@ -1,49 +1,49 @@
 
 import os
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-BOT_PID_FILE = "/tmp/shrutix_bot.pid"
 
-
-def bot_is_running():
-    try:
-        with open(BOT_PID_FILE, "r", encoding="utf-8") as file:
-            pid = int(file.read().strip())
-
-        os.kill(pid, 0)
-        return True
-    except (OSError, ValueError):
-        return False
-
-
-class Handler(BaseHTTPRequestHandler):
+class HealthHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        if self.path not in ("/", "/health"):
-            self.send_response(404)
+        if self.path in ("/", "/health", "/health/"):
+            body = b'{"status":"ok","service":"SemXMusic"}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
             self.end_headers()
-            return
+            self.wfile.write(body)
+        else:
+            body = b'{"status":"not_found"}'
+            self.send_response(404)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
 
-        running = bot_is_running()
-        status = 200 if running else 503
-        message = (
-            b"Shrutix Music Bot is running!"
-            if running
-            else b"Music bot is restarting or not running."
-        )
-
-        self.send_response(status)
-        self.send_header("Content-Type", "text/plain; charset=utf-8")
-        self.send_header("Content-Length", str(len(message)))
-        self.end_headers()
-        self.wfile.write(message)
-
-    def log_message(self, format, *args):
+    def log_message(self, format_string, *args):
         pass
 
 
-if __name__ == "__main__":
+def start_health_server():
     port = int(os.environ.get("PORT", "10000"))
-    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
-    print(f"Health server listening on port {port}", flush=True)
-    server.serve_forever()
+    server = ThreadingHTTPServer(
+        ("0.0.0.0", port),
+        HealthHandler
+    )
+
+    thread = threading.Thread(
+        target=server.serve_forever,
+        name="semxmusic-health",
+        daemon=True
+    )
+    thread.start()
+
+    print(f"SemXMusic health server running on port {port}", flush=True)
+    return server
+
+
+if __name__ == "__main__":
+    server = start_health_server()
+    threading.Event().wait()
     
