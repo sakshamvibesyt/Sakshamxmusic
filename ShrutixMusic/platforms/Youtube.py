@@ -1,3 +1,4 @@
+
 import asyncio
 import os
 import re
@@ -11,25 +12,71 @@ from py_yt import VideosSearch, Playlist
 
 # ============================================================
 # YouTube platform helper
-# No paid API / API key / external downloader API required.
-#
-# Requirements:
-#   pip install yt-dlp py-yt
-#   ffmpeg must be available on the system.
+# No paid API key required.
+# Requires yt-dlp, py-yt and ffmpeg.
 # ============================================================
 
 DOWNLOAD_DIR = os.environ.get("DOWNLOAD_DIR", "downloads")
 
-AUDIO_DOWNLOAD_PATH = os.path.abspath(
-    os.path.expanduser(os.environ.get("AUDIO_DOWNLOAD_PATH", "").strip())
-) if os.environ.get("AUDIO_DOWNLOAD_PATH", "").strip() else ""
+AUDIO_DOWNLOAD_PATH = (
+    os.path.abspath(
+        os.path.expanduser(
+            os.environ.get("AUDIO_DOWNLOAD_PATH", "").strip()
+        )
+    )
+    if os.environ.get("AUDIO_DOWNLOAD_PATH", "").strip()
+    else ""
+)
 
-VIDEO_DOWNLOAD_PATH = os.path.abspath(
-    os.path.expanduser(os.environ.get("VIDEO_DOWNLOAD_PATH", "").strip())
-) if os.environ.get("VIDEO_DOWNLOAD_PATH", "").strip() else ""
+VIDEO_DOWNLOAD_PATH = (
+    os.path.abspath(
+        os.path.expanduser(
+            os.environ.get("VIDEO_DOWNLOAD_PATH", "").strip()
+        )
+    )
+    if os.environ.get("VIDEO_DOWNLOAD_PATH", "").strip()
+    else ""
+)
 
 AUDIO_EXTENSIONS = ("webm", "m4a", "mp3", "opus", "ogg")
 VIDEO_EXTENSIONS = ("mp4", "mkv", "webm")
+
+
+# ============================================================
+# External media path checker
+# Required by ShrutixMusic/utils/stream/autoclear.py
+# ============================================================
+
+def is_external_path(path: str) -> bool:
+    """Return True if the file is inside an external media directory."""
+    if not path:
+        return False
+
+    try:
+        file_path = os.path.abspath(
+            os.path.expanduser(str(path))
+        )
+
+        for directory in (
+            AUDIO_DOWNLOAD_PATH,
+            VIDEO_DOWNLOAD_PATH,
+        ):
+            if not directory:
+                continue
+
+            base_path = os.path.abspath(
+                os.path.expanduser(directory)
+            )
+
+            if os.path.commonpath(
+                [file_path, base_path]
+            ) == base_path:
+                return True
+
+    except (ValueError, OSError, TypeError):
+        return False
+
+    return False
 
 
 def _clean_youtube_url(link: str) -> str:
@@ -42,30 +89,47 @@ def _clean_youtube_url(link: str) -> str:
     if "youtube.com/watch" in link:
         match = re.search(r"[?&]v=([A-Za-z0-9_-]{6,})", link)
         if match:
-            return f"https://www.youtube.com/watch?v={match.group(1)}"
+            return (
+                "https://www.youtube.com/watch?v="
+                + match.group(1)
+            )
 
     if "youtu.be/" in link:
         match = re.search(r"youtu\.be/([A-Za-z0-9_-]{6,})", link)
         if match:
-            return f"https://www.youtube.com/watch?v={match.group(1)}"
+            return (
+                "https://www.youtube.com/watch?v="
+                + match.group(1)
+            )
 
     if re.fullmatch(r"[A-Za-z0-9_-]{6,}", link):
-        return f"https://www.youtube.com/watch?v={link}"
+        return "https://www.youtube.com/watch?v=" + link
 
     return link.split("&")[0]
 
 
 def _video_id(link: str) -> str:
-    match = re.search(r"(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{6,})", str(link))
+    match = re.search(
+        r"(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{6,})",
+        str(link),
+    )
     return match.group(1) if match else ""
 
 
-def _find_external(directory: str, video_id: str, extensions) -> str | None:
+def _find_external(
+    directory: str,
+    video_id: str,
+    extensions,
+) -> str | None:
     if not directory or not video_id:
         return None
 
     for ext in extensions:
-        path = os.path.join(directory, f"{video_id}.{ext}")
+        path = os.path.join(
+            directory,
+            f"{video_id}.{ext}",
+        )
+
         if os.path.isfile(path) and os.path.getsize(path) > 0:
             return path
 
@@ -74,13 +138,16 @@ def _find_external(directory: str, video_id: str, extensions) -> str | None:
 
 def time_to_seconds(time):
     stringt = str(time)
+
     if not stringt or stringt == "None":
         return 0
 
     try:
         return sum(
             int(x) * 60 ** i
-            for i, x in enumerate(reversed(stringt.split(":")))
+            for i, x in enumerate(
+                reversed(stringt.split(":"))
+            )
         )
     except (TypeError, ValueError):
         return 0
@@ -108,7 +175,10 @@ def _audio_ydl_options(output_path: str):
 
 def _video_ydl_options(output_path: str):
     return {
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "format": (
+            "bestvideo[ext=mp4]+bestaudio[ext=m4a]"
+            "/best[ext=mp4]/best"
+        ),
         "outtmpl": output_path,
         "merge_output_format": "mp4",
         "noplaylist": True,
@@ -120,8 +190,12 @@ def _video_ydl_options(output_path: str):
     }
 
 
-def _download_sync(link: str, kind: str, output_file: str) -> str | None:
-    """Download media directly with yt-dlp. No external API is used."""
+def _download_sync(
+    link: str,
+    kind: str,
+    output_file: str,
+) -> str | None:
+    """Download media directly with yt-dlp."""
     url = _clean_youtube_url(link)
 
     if not url:
@@ -134,23 +208,25 @@ def _download_sync(link: str, kind: str, output_file: str) -> str | None:
             opts = _video_ydl_options(output_file)
 
         with yt_dlp.YoutubeDL(opts) as ydl:
-            info = ydl.extract_info(url, download=True)
+            ydl.extract_info(url, download=True)
 
-        # yt-dlp may change the final extension after post-processing.
         requested = os.path.splitext(output_file)[0]
+
         candidates = [
             output_file,
             f"{requested}.mp3",
             f"{requested}.mp4",
             f"{requested}.m4a",
             f"{requested}.webm",
+            f"{requested}.mkv",
+            f"{requested}.opus",
+            f"{requested}.ogg",
         ]
 
         for path in candidates:
             if os.path.isfile(path) and os.path.getsize(path) > 0:
                 return path
 
-        # Last-resort lookup in the download directory.
         directory = os.path.dirname(output_file) or "."
         prefix = os.path.basename(requested)
 
@@ -158,32 +234,56 @@ def _download_sync(link: str, kind: str, output_file: str) -> str | None:
             for name in os.listdir(directory):
                 if name.startswith(prefix + "."):
                     path = os.path.join(directory, name)
-                    if os.path.isfile(path) and os.path.getsize(path) > 0:
+
+                    if (
+                        os.path.isfile(path)
+                        and os.path.getsize(path) > 0
+                    ):
                         return path
 
-        
     except Exception as e:
-        print(f"[YT-DLP DOWNLOAD ERROR] {type(e).__name__}: {e}", flush=True)
-        return None
+        print(
+            f"[YT-DLP DOWNLOAD ERROR] "
+            f"{type(e).__name__}: {e}",
+            flush=True,
+        )
+
+    return None
 
 
-async def _download_media(link: str, kind: str, timeout: int) -> str | None:
+async def _download_media(
+    link: str,
+    kind: str,
+    timeout: int,
+) -> str | None:
     video_id = _video_id(link)
 
     if not video_id:
-        # Try resolving a normal YouTube URL through yt-dlp even if the ID
-        # wasn't extracted by our small helper.
-        video_id = re.sub(r"[^A-Za-z0-9_-]", "", str(link))[:80]
+        cleaned = _clean_youtube_url(link)
+        video_id = _video_id(cleaned)
 
     if not video_id:
         return None
 
     is_audio = kind == "audio"
-    external = AUDIO_DOWNLOAD_PATH if is_audio else VIDEO_DOWNLOAD_PATH
-    extensions = AUDIO_EXTENSIONS if is_audio else VIDEO_EXTENSIONS
+    external = (
+        AUDIO_DOWNLOAD_PATH
+        if is_audio
+        else VIDEO_DOWNLOAD_PATH
+    )
+    extensions = (
+        AUDIO_EXTENSIONS
+        if is_audio
+        else VIDEO_EXTENSIONS
+    )
 
     if external:
-        found = _find_external(external, video_id, extensions)
+        found = _find_external(
+            external,
+            video_id,
+            extensions,
+        )
+
         if found:
             return found
 
@@ -191,10 +291,14 @@ async def _download_media(link: str, kind: str, timeout: int) -> str | None:
 
     base_name = os.path.join(
         DOWNLOAD_DIR,
-        video_id
+        video_id,
     )
 
-    expected = f"{base_name}.mp3" if is_audio else f"{base_name}.mp4"
+    expected = (
+        f"{base_name}.mp3"
+        if is_audio
+        else f"{base_name}.mp4"
+    )
 
     if os.path.isfile(expected) and os.path.getsize(expected) > 0:
         return expected
@@ -223,7 +327,6 @@ async def download_video(link: str) -> str | None:
 
 # ============================================================
 # Autoplay
-# Uses YouTube search directly instead of a paid API.
 # ============================================================
 
 AUTOPLAY_REQUEST_TIMEOUT = 30
@@ -236,13 +339,11 @@ async def get_autoplay(
     retries: int = 2,
     seed_id: str = None,
 ) -> list:
-    """Return YouTube video IDs related to the current track.
-
-    This replaces the old paid /autoplay API endpoint.
-    """
+    """Return related YouTube video IDs."""
     del retries
 
     seed = seed_id or video_id
+
     if not seed:
         return []
 
@@ -259,12 +360,16 @@ async def get_autoplay(
             }
 
             with yt_dlp.YoutubeDL(opts) as ydl:
-                info = ydl.extract_info(seed_url, download=False)
+                info = ydl.extract_info(
+                    seed_url,
+                    download=False,
+                )
 
                 title = info.get("title", "")
                 channel = info.get("channel", "")
 
                 query = title
+
                 if channel:
                     query = f"{title} {channel}"
 
@@ -274,8 +379,10 @@ async def get_autoplay(
                 )
 
                 tracks = []
-                for entry in (result.get("entries") or []):
+
+                for entry in result.get("entries") or []:
                     vid = entry.get("id")
+
                     if vid and vid != seed:
                         tracks.append(vid)
 
@@ -291,7 +398,7 @@ async def get_autoplay(
 
 
 # ============================================================
-# YouTube API-compatible class used by the rest of ShrutixMusic
+# YouTube API-compatible class
 # ============================================================
 
 class YouTubeAPI:
@@ -300,19 +407,26 @@ class YouTubeAPI:
         self.regex = r"(?:youtube\.com|youtu\.be)"
         self.status = "https://www.youtube.com/oembed?url="
         self.listbase = "https://youtube.com/playlist?list="
-        self.reg = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+        self.reg = re.compile(
+            r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])"
+        )
 
     async def exists(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         if videoid:
             link = self.base + link
 
-        return bool(re.search(self.regex, str(link)))
+        return bool(
+            re.search(self.regex, str(link))
+        )
 
-    async def url(self, message_1: Message) -> Union[str, None]:
+    async def url(
+        self,
+        message_1: Message,
+    ) -> Union[str, None]:
         messages = [message_1]
 
         if message_1.reply_to_message:
@@ -323,12 +437,13 @@ class YouTubeAPI:
                 for entity in message.entities:
                     if entity.type == MessageEntityType.URL:
                         text = message.text or message.caption or ""
+
                         return text[
                             entity.offset:
                             entity.offset + entity.length
                         ]
 
-            elif message.caption_entities:
+            if message.caption_entities:
                 for entity in message.caption_entities:
                     if entity.type == MessageEntityType.TEXT_LINK:
                         return entity.url
@@ -338,7 +453,7 @@ class YouTubeAPI:
     async def details(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         if videoid:
             link = self.base + link
@@ -360,7 +475,8 @@ class YouTubeAPI:
 
         duration_sec = (
             int(time_to_seconds(duration_min))
-            if duration_min else 0
+            if duration_min
+            else 0
         )
 
         return (
@@ -374,7 +490,7 @@ class YouTubeAPI:
     async def title(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         details = await self.details(link, videoid)
         return details[0]
@@ -382,7 +498,7 @@ class YouTubeAPI:
     async def duration(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         details = await self.details(link, videoid)
         return details[1]
@@ -390,7 +506,7 @@ class YouTubeAPI:
     async def thumbnail(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         details = await self.details(link, videoid)
         return details[3]
@@ -398,7 +514,7 @@ class YouTubeAPI:
     async def video(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         if videoid:
             link = self.base + link
@@ -419,7 +535,7 @@ class YouTubeAPI:
         link,
         limit,
         user_id,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         del user_id
 
@@ -442,6 +558,7 @@ class YouTubeAPI:
                 continue
 
             vid = data.get("id")
+
             if vid:
                 ids.append(vid)
 
@@ -450,7 +567,7 @@ class YouTubeAPI:
     async def track(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         if videoid:
             link = self.base + link
@@ -484,7 +601,7 @@ class YouTubeAPI:
     async def formats(
         self,
         link: str,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         if videoid:
             link = self.base + link
@@ -501,23 +618,26 @@ class YouTubeAPI:
 
         try:
             with yt_dlp.YoutubeDL(ytdl_opts) as ydl:
-                r = ydl.extract_info(link, download=False)
+                result = ydl.extract_info(
+                    link,
+                    download=False,
+                )
 
             formats_available = []
 
-            for fmt in r.get("formats", []):
+            for fmt in result.get("formats", []):
                 try:
-                    if "dash" not in str(fmt.get("format", "")).lower():
-                        formats_available.append(
-                            {
-                                "format": fmt.get("format"),
-                                "filesize": fmt.get("filesize"),
-                                "format_id": fmt.get("format_id"),
-                                "ext": fmt.get("ext"),
-                                "format_note": fmt.get("format_note"),
-                                "yturl": link,
-                            }
-                        )
+                    if "dash" not in str(
+                        fmt.get("format", "")
+                    ).lower():
+                        formats_available.append({
+                            "format": fmt.get("format"),
+                            "filesize": fmt.get("filesize"),
+                            "format_id": fmt.get("format_id"),
+                            "ext": fmt.get("ext"),
+                            "format_note": fmt.get("format_note"),
+                            "yturl": link,
+                        })
                 except Exception:
                     continue
 
@@ -530,7 +650,7 @@ class YouTubeAPI:
         self,
         link: str,
         query_type: int,
-        videoid: Union[bool, str] = None
+        videoid: Union[bool, str] = None,
     ):
         if videoid:
             link = self.base + link
@@ -538,8 +658,8 @@ class YouTubeAPI:
         if "&" in link:
             link = link.split("&")[0]
 
-        a = VideosSearch(link, limit=10)
-        result = (await a.next()).get("result") or []
+        search = VideosSearch(link, limit=10)
+        result = (await search.next()).get("result") or []
 
         if not result:
             raise ValueError("No YouTube results found.")
@@ -567,7 +687,7 @@ class YouTubeAPI:
         format_id: Union[bool, str] = None,
         title: Union[bool, str] = None,
     ) -> str:
-        # Kept compatible with the original ShrutixMusic callers.
+        # Preserve compatibility with existing callers.
         del mystic, songaudio, songvideo, format_id, title
 
         if videoid:
@@ -589,3 +709,4 @@ class YouTubeAPI:
 
 
 YouTube = YouTubeAPI()
+                        
